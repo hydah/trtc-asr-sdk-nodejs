@@ -1,0 +1,37 @@
+{
+  "name": "trtc-asr",
+  "version": "0.1.0",
+  "description": "Tencent TRTC Real-time ASR SDK for Node.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "trtc",
+    "asr",
+    "speech-recognition",
+    "tencent",
+    "real-time",
+    "websocket"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "tls-sig-api-v2": "^1.0.1",
+    "uuid": "^9.0.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.0",
+    "@types/ws": "^8.5.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "@types/jest": "^29.0.0",
+    "typescript": "^5.3.0"
+  }
+}
