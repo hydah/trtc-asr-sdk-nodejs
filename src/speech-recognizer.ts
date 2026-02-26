@@ -205,7 +205,13 @@ export class SpeechRecognizer {
 
     this.state = State.STOPPING;
 
+    if (!this.ws) {
+      this.state = State.STOPPED;
+      throw new ASRError(ErrorCode.NOT_STARTED, "connection not established");
+    }
+
     // Send end signal
+    const ws = this.ws;
     try {
       await new Promise<void>((resolve, reject) => {
         const endMsg = JSON.stringify({ type: "end" });
@@ -213,7 +219,7 @@ export class SpeechRecognizer {
           reject(new ASRError(ErrorCode.WRITE_FAILED, "send end signal timeout"));
         }, this.writeTimeout);
 
-        this.ws!.send(endMsg, (err) => {
+        ws.send(endMsg, (err) => {
           clearTimeout(timeout);
           if (err) {
             reject(

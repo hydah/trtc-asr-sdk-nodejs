@@ -115,26 +115,16 @@ main().catch(console.error);
 
 ## 示例
 
-完整示例请参见 [`examples/`](./examples/) 目录：
-
-- [`realtime-asr.ts`](./examples/realtime-asr.ts) — 硬编码凭证的基础示例
-- [`realtime-asr-env.ts`](./examples/realtime-asr-env.ts) — 使用环境变量的推荐示例
+完整示例请参见 [`examples/realtime-asr.ts`](./examples/realtime-asr.ts)。
 
 运行示例：
 
 ```bash
-# 安装依赖
+git clone https://github.com/hydah/trtc-asr-sdk-nodejs.git
+cd trtc-asr-sdk-nodejs
 npm install
 
-# 使用环境变量（推荐）
-export TRTC_APP_ID="1300403317"
-export TRTC_SDK_APP_ID="1400188366"
-export TRTC_SECRET_KEY="your-sdk-secret-key"
-
-npx ts-node examples/realtime-asr-env.ts -f test.pcm
-
-# 查看所有选项
-npx ts-node examples/realtime-asr-env.ts --help
+npx ts-node examples/realtime-asr.ts -f test.pcm
 ```
 
 ## 项目结构
@@ -149,11 +139,10 @@ trtc-asr-sdk-nodejs/
 │   ├── speech-recognizer.ts        # 实时语音识别器
 │   └── errors.ts                   # 错误定义
 ├── examples/                       # 示例代码
-│   ├── .env.example                # 环境变量模板
-│   ├── realtime-asr.ts             # 基础示例
-│   └── realtime-asr-env.ts         # 环境变量示例（推荐）
+│   └── realtime-asr.ts             # 实时语音识别示例
 ├── tests/                          # 测试
-│   └── signature.test.ts           # 签名参数测试
+│   ├── signature.test.ts           # 签名参数测试
+│   └── recognizer.lifecycle.test.ts # 生命周期健壮性测试
 ├── dist/                           # 编译输出（npm 发布内容）
 ├── package.json                    # 包定义
 ├── tsconfig.json                   # TypeScript 配置

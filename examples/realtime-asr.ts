@@ -114,7 +114,7 @@ async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
       file: { type: "string", short: "f", default: "test.pcm" },
-      engine: { type: "string", short: "e", default: "16k_zh" },
+      engine: { type: "string", short: "e", default: "16k_zh_en" },
       concurrency: { type: "string", short: "c", default: "1" },
       loop: { type: "boolean", short: "l", default: false },
     },
@@ -125,7 +125,7 @@ async function main(): Promise<void> {
   const concurrency = parseInt(values.concurrency!, 10);
   const loop = values.loop!;
 
-  if (APP_ID === 0 || SDK_APP_ID === 0 || !SECRET_KEY) {
+  if (!APP_ID || !SDK_APP_ID || !SECRET_KEY) {
     console.error(
       "Error: Please set APP_ID, SDK_APP_ID and SECRET_KEY in the code.\n\n" +
         "Steps:\n" +
