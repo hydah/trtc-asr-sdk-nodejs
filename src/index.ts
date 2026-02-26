@@ -22,3 +22,13 @@ export {
   SourceType,
   SENTENCE_ENDPOINT,
 } from "./sentence-recognizer";
+export {
+  FileRecognizer,
+  CreateRecTaskRequest,
+  TaskStatus,
+  SentenceDetail,
+  SentenceWords,
+  FileSourceType,
+  TaskStatusCode,
+  FILE_ENDPOINT,
+} from "./file-recognizer";

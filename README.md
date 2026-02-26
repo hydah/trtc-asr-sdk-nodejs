@@ -1,6 +1,6 @@
 # TRTC-ASR Node.js SDK
 
-基于 TRTC 鉴权体系的语音识别（ASR）Node.js SDK，支持实时语音识别（WebSocket）和一句话识别（HTTP）两种模式。
+基于 TRTC 鉴权体系的语音识别（ASR）Node.js SDK，支持实时语音识别（WebSocket）、一句话识别（HTTP）和录音文件识别（异步 HTTP）三种模式。
 
 > 其他语言 SDK：[Go](https://github.com/hydah/trtc-asr-sdk-go) | [Python](https://github.com/hydah/trtc-asr-sdk-python)
 
@@ -105,6 +105,44 @@ async function main() {
 main().catch(console.error);
 ```
 
+### 录音文件识别
+
+```typescript
+import { Credential, FileRecognizer } from "trtc-asr";
+import * as fs from "fs";
+
+async function main() {
+  // 1. 创建凭证
+  const credential = new Credential(
+    0,                       // 腾讯云 APPID
+    0,                       // TRTC SDKAppID
+    "your-sdk-secret-key",   // SDK密钥
+  );
+
+  // 2. 创建录音文件识别器
+  const recognizer = new FileRecognizer(credential);
+
+  // 3. 提交识别任务（本地文件）
+  const data = fs.readFileSync("audio.wav");
+  const taskId = await recognizer.createTaskFromData(Buffer.from(data), "16k_zh_en");
+  console.log(`任务已提交: ${taskId}`);
+
+  // 4. 轮询等待结果（默认 1 秒间隔，10 分钟超时）
+  const status = await recognizer.waitForResult(taskId);
+
+  console.log(`识别结果: ${status.result}`);
+  console.log(`音频时长: ${status.audioDuration.toFixed(2)} s`);
+
+  // 或者从 URL 提交（支持更大文件，≤1GB / ≤12h）
+  // const taskId = await recognizer.createTaskFromURL("https://example.com/audio.wav", "16k_zh_en");
+
+  // 或者自定义轮询间隔（毫秒）
+  // const status = await recognizer.waitForResultWithInterval(taskId, 2000, 1800000);
+}
+
+main().catch(console.error);
+```
+
 ## 前提条件
 
 使用本 SDK 前，您需要：
@@ -151,7 +189,8 @@ main().catch(console.error);
 完整示例请参见：
 
 - **实时语音识别**：[`examples/realtime-asr.ts`](./examples/realtime-asr.ts) — WebSocket 流式识别
-- **一句话识别**：[`examples/sentence-asr.ts`](./examples/sentence-asr.ts) — HTTP 短音频识别
+- **一句话识别**：[`examples/sentence-asr.ts`](./examples/sentence-asr.ts) — HTTP 短音频识别（≤60s）
+- **录音文件识别**：[`examples/file-asr.ts`](./examples/file-asr.ts) — 异步长音频识别
 
 运行示例：
 
@@ -165,6 +204,9 @@ npx ts-node examples/realtime-asr.ts -f examples/test.pcm
 
 # 一句话识别
 npx ts-node examples/sentence-asr.ts -f examples/test.pcm
+
+# 录音文件识别
+npx ts-node examples/file-asr.ts -f examples/test.wav
 
 # 查看所有选项
 npx ts-node examples/realtime-asr.ts --help
@@ -181,15 +223,18 @@ trtc-asr-sdk-nodejs/
 │   ├── signature.ts                # URL 请求参数构建
 │   ├── speech-recognizer.ts        # 实时语音识别器（WebSocket）
 │   ├── sentence-recognizer.ts      # 一句话识别器（HTTP）
+│   ├── file-recognizer.ts          # 录音文件识别器（异步 HTTP）
 │   └── errors.ts                   # 错误定义
 ├── examples/                       # 示例代码
 │   ├── test.pcm                    # 测试音频文件
 │   ├── realtime-asr.ts             # 实时语音识别示例
-│   └── sentence-asr.ts             # 一句话识别示例
+│   ├── sentence-asr.ts             # 一句话识别示例
+│   └── file-asr.ts                 # 录音文件识别示例
 ├── tests/                          # 测试
 │   ├── signature.test.ts           # 签名参数测试
 │   ├── recognizer.lifecycle.test.ts # 生命周期健壮性测试
-│   └── sentence-recognizer.test.ts # 一句话识别测试
+│   ├── sentence-recognizer.test.ts # 一句话识别测试
+│   └── file-recognizer.test.ts     # 录音文件识别测试
 ├── dist/                           # 编译输出（npm 发布内容）
 ├── package.json                    # 包定义
 ├── tsconfig.json                   # TypeScript 配置
@@ -211,6 +256,7 @@ UserSig 是基于 SDKAppID 和 SDK 密钥计算的签名，用于 TRTC 服务鉴
 
 - **实时语音识别**：支持 PCM 格式（`voiceFormat=1`），建议 16kHz、16bit、单声道
 - **一句话识别**：支持 wav、pcm、ogg-opus、mp3、m4a，音频时长 ≤ 60s，文件 ≤ 3MB
+- **录音文件识别**：支持 wav、ogg-opus、mp3、m4a，本地文件 ≤ 5MB，URL ≤ 1GB / ≤ 12h
 
 ### TypeScript 和 JavaScript 都能用吗？
 
