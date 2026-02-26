@@ -1,5 +1,5 @@
 /**
- * Tencent TRTC Real-time ASR SDK for Node.js.
+ * Tencent TRTC ASR SDK for Node.js.
  */
 
 export { Credential } from "./credential";
@@ -14,3 +14,11 @@ export {
   WordInfo,
   ENDPOINT,
 } from "./speech-recognizer";
+export {
+  SentenceRecognizer,
+  SentenceRecognitionRequest,
+  SentenceRecognitionResult,
+  SentenceWord,
+  SourceType,
+  SENTENCE_ENDPOINT,
+} from "./sentence-recognizer";

@@ -1,6 +1,8 @@
 # TRTC-ASR Node.js SDK
 
-基于 TRTC 鉴权体系的实时语音识别（ASR）Node.js SDK，通过 WebSocket 协议与 ASR 服务通信。
+基于 TRTC 鉴权体系的语音识别（ASR）Node.js SDK，支持实时语音识别（WebSocket）和一句话识别（HTTP）两种模式。
+
+> 其他语言 SDK：[Go](https://github.com/hydah/trtc-asr-sdk-go) | [Python](https://github.com/hydah/trtc-asr-sdk-python)
 
 ## 安装
 
@@ -72,6 +74,37 @@ async function main() {
 main().catch(console.error);
 ```
 
+### 一句话识别
+
+```typescript
+import { Credential, SentenceRecognizer } from "trtc-asr";
+import * as fs from "fs";
+
+async function main() {
+  // 1. 创建凭证
+  const credential = new Credential(
+    0,                       // 腾讯云 APPID
+    0,                       // TRTC SDKAppID
+    "your-sdk-secret-key",   // SDK密钥
+  );
+
+  // 2. 创建一句话识别器
+  const recognizer = new SentenceRecognizer(credential);
+
+  // 3. 从本地文件识别（自动 base64 编码）
+  const data = fs.readFileSync("audio.pcm");
+  const result = await recognizer.recognizeData(Buffer.from(data), "pcm", "16k_zh_en");
+
+  console.log(`识别结果: ${result.result}`);
+  console.log(`音频时长: ${result.audioDuration} ms`);
+
+  // 或者从 URL 识别
+  // const result = await recognizer.recognizeURL("https://example.com/audio.wav", "wav", "16k_zh_en");
+}
+
+main().catch(console.error);
+```
+
 ## 前提条件
 
 使用本 SDK 前，您需要：
@@ -115,7 +148,10 @@ main().catch(console.error);
 
 ## 示例
 
-完整示例请参见 [`examples/realtime-asr.ts`](./examples/realtime-asr.ts)。
+完整示例请参见：
+
+- **实时语音识别**：[`examples/realtime-asr.ts`](./examples/realtime-asr.ts) — WebSocket 流式识别
+- **一句话识别**：[`examples/sentence-asr.ts`](./examples/sentence-asr.ts) — HTTP 短音频识别
 
 运行示例：
 
@@ -124,7 +160,14 @@ git clone https://github.com/hydah/trtc-asr-sdk-nodejs.git
 cd trtc-asr-sdk-nodejs
 npm install
 
-npx ts-node examples/realtime-asr.ts -f test.pcm
+# 实时语音识别
+npx ts-node examples/realtime-asr.ts -f examples/test.pcm
+
+# 一句话识别
+npx ts-node examples/sentence-asr.ts -f examples/test.pcm
+
+# 查看所有选项
+npx ts-node examples/realtime-asr.ts --help
 ```
 
 ## 项目结构
@@ -136,13 +179,17 @@ trtc-asr-sdk-nodejs/
 │   ├── credential.ts               # 凭证管理（APPID + SDKAppID + SDK密钥）
 │   ├── usersig.ts                  # TRTC UserSig 生成
 │   ├── signature.ts                # URL 请求参数构建
-│   ├── speech-recognizer.ts        # 实时语音识别器
+│   ├── speech-recognizer.ts        # 实时语音识别器（WebSocket）
+│   ├── sentence-recognizer.ts      # 一句话识别器（HTTP）
 │   └── errors.ts                   # 错误定义
 ├── examples/                       # 示例代码
-│   └── realtime-asr.ts             # 实时语音识别示例
+│   ├── test.pcm                    # 测试音频文件
+│   ├── realtime-asr.ts             # 实时语音识别示例
+│   └── sentence-asr.ts             # 一句话识别示例
 ├── tests/                          # 测试
 │   ├── signature.test.ts           # 签名参数测试
-│   └── recognizer.lifecycle.test.ts # 生命周期健壮性测试
+│   ├── recognizer.lifecycle.test.ts # 生命周期健壮性测试
+│   └── sentence-recognizer.test.ts # 一句话识别测试
 ├── dist/                           # 编译输出（npm 发布内容）
 ├── package.json                    # 包定义
 ├── tsconfig.json                   # TypeScript 配置
@@ -153,8 +200,8 @@ trtc-asr-sdk-nodejs/
 
 ### APPID 和 SDKAppID 有什么区别？
 
-- **APPID**（如 `1300403317`）：腾讯云账号级别的 ID，从 [CAM 密钥管理](https://console.cloud.tencent.com/cam/capi) 获取，用于 WebSocket URL 路径
-- **SDKAppID**（如 `1400188366`）：TRTC 应用级别的 ID，从 [TRTC 控制台](https://console.cloud.tencent.com/trtc/app) 获取，用于 Header 鉴权
+- **APPID**（如 `13xxxxxxxx`）：腾讯云账号级别的 ID，从 [CAM 密钥管理](https://console.cloud.tencent.com/cam/capi) 获取，用于 WebSocket URL 路径
+- **SDKAppID**（如 `14xxxxxxxx`）：TRTC 应用级别的 ID，从 [TRTC 控制台](https://console.cloud.tencent.com/trtc/app) 获取，用于 Header 鉴权
 
 ### UserSig 是什么？
 
@@ -162,7 +209,8 @@ UserSig 是基于 SDKAppID 和 SDK 密钥计算的签名，用于 TRTC 服务鉴
 
 ### 支持哪些音频格式？
 
-当前支持 PCM 格式（`voiceFormat=1`），建议使用 16kHz、16bit、单声道的 PCM 音频。
+- **实时语音识别**：支持 PCM 格式（`voiceFormat=1`），建议 16kHz、16bit、单声道
+- **一句话识别**：支持 wav、pcm、ogg-opus、mp3、m4a，音频时长 ≤ 60s，文件 ≤ 3MB
 
 ### TypeScript 和 JavaScript 都能用吗？
 
